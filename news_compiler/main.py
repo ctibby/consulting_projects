@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 from transformers import BartTokenizer, BartForConditionalGeneration
+from article_relevance_function import topic_similarity_with_keyword_check
 
 model_name = "facebook/bart-large-cnn"
 tokenizer = BartTokenizer.from_pretrained(model_name)
@@ -21,7 +22,7 @@ def fetch_article_summary(article_url, content_class):
         print(f"An error occurred: {e}")
         return "Summary could not be retrieved."
     
-def summarize_text(text, max_length=150, min_length=100, length_penalty=2.0, num_beams=4):
+def summarize_text(text, max_length=512, min_length=100, length_penalty=2.0, num_beams=4):
     inputs = tokenizer.encode("summarize: " + text, return_tensors="pt", max_length=1024, truncation=True)
     summary_ids = model.generate(inputs, max_length=max_length, min_length=min_length, length_penalty=length_penalty, num_beams=num_beams, early_stopping=True)
     summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
@@ -47,15 +48,27 @@ def add_to_db(url, articles_df, articleid, headlineid, urladd, content_class):
                 full_url = f"{urladd}{full_url}"
                 
                 article_content = fetch_article_summary(full_url, content_class)
-                temp_df = pd.DataFrame([{'Headline': headline, 'URL': full_url, 'Date and Time': date_time, 'Content': article_content, 'AISummary': summarize_text(article_content)}])
-                articles_df = pd.concat([articles_df, temp_df], ignore_index=True)
-                print(f"{headline}\nSUCCESSFULLY ENTERED AND SUMMARIZED\n")
+                article_relevance = topic_similarity_with_keyword_check(article_content)
+                
+                if article_relevance:
+                    # With AISummary
+                    temp_df = pd.DataFrame([{'Headline': headline, 'URL': full_url, 'Date and Time': date_time, 'Content': article_content, 'AISummary': summarize_text(article_content)}])
+                    # Without AI Summary (Faster)
+                    # temp_df = pd.DataFrame([{'Headline': headline, 'URL': full_url, 'Date and Time': date_time, 'Content': article_content, 'AISummary': "Not Pulled - Change code to other option to include", 'Relevance': article_relevance}])
+
+                    articles_df = pd.concat([articles_df, temp_df], ignore_index=True)
+                    print(f"{headline}\nSUCCESSFULLY ENTERED AND SUMMARIZED")
+                    print(f"Relevance: {article_relevance}\n")
+                else:
+                    print(f"{headline}\nSKIPPED")
+                    print(f"Relevance: {article_relevance}\n")
+
 
     print(f"*****\n")
     return(articles_df)
 
 def scrape_pal_articles_to_db():
-    articles_df = pd.DataFrame(columns=['Headline', 'URL', 'Date and Time', 'Content', 'AISummary'])
+    articles_df = pd.DataFrame(columns=['Headline', 'URL', 'Date and Time', 'Content', 'AISummary', 'Relevance'])
 
     articles_df = add_to_db("https://www.paloaltoonline.com/category/palo-alto-city/", articles_df, 'article', 'h2',"" ,'entry-content')
     articles_df = add_to_db("https://www.paloaltoonline.com/category/palo-alto-city/page/2/", articles_df, 'article', 'h2',"" ,'entry-content')
@@ -75,8 +88,8 @@ def scrape_pal_articles_to_db():
 
     with open(filename, 'w', encoding='utf-8') as file:
         for index, row in articles_df.iterrows():
-            file.write(f"Headline: {row['Headline']}\nURL: {row['URL']}\nDate and Time: {row['Date and Time'].strftime('%b %d, %Y %I:%M %p') if not pd.isna(row['Date and Time']) else 'Date not found'}\nContent:\n\n\n{row['Content']}\nAISummary:\n\n{row['AISummary']}\n\n---\n\n")
-
+            file.write(f"Headline: {row['Headline']}\nURL: {row['URL']}\nDate and Time: {row['Date and Time'].strftime('%b %d, %Y %I:%M %p') if not pd.isna(row['Date and Time']) else 'Date not found'}\nAISummary:\n\n{row['AISummary']}\n\n---\n\n")
+    
     # articles_df.to_csv(f'article_summaries_{most_recent_date}.csv', index=False, encoding='utf-8')
 
     print(f"Article summaries have been saved to {filename}.")

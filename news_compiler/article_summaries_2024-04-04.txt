@@ -1,12 +1,3 @@
-Headline: Protesters call to ‘Free Palestine!’ in rally outside Palo Alto City Hall
-URL: https://www.paloaltoonline.com/palo-alto/2024/04/04/protesters-call-to-free-palestine-in-rally-outside-palo-alto-city-hall/
-Date and Time: Apr 04, 2024 08:49 AM
-AISummary:
-
-Hundreds gather outside Palo Alto City Hall to call for a ceasefire in the Israel-Hamas war. Violence erupted on Oct. 7 when Hamas-led fighters crossed from Gaza into Israel. Health officials on the ground say Israel’s subsequent assault has killed more than 31,000 Gaza residents. A doctor who recently returned from Gaza compared the scenes there to “an apocalyptic horror movie” and called the situation in Gaza “a genocide.’ “What we are advocating for in a call for ceasefire is a call to the end of all the violence — the entire cycle of it,” she said.
-
----
-
 Headline: Even pro-housing cities in San Mateo County struggle with stricter oversight
 URL: https://www.smdailyjournal.com//news/local/even-pro-housing-cities-in-san-mateo-county-struggle-with-stricter-oversight/article_84fa2b80-f22e-11ee-942c-13746d702d92.html
 Date and Time: Apr 04, 2024 07:20 AM
@@ -166,24 +157,6 @@ Date and Time: Mar 26, 2024 09:49 AM
 AISummary:
 
 Katie Causey is the first candidate to declare candidacy for the Palo Alto City Council. Causey, who serves on the city’s Human Relations Commission, is known for her roles at various local nonprofits. Her full-time job is as a community organizer for the Silicon Valley Bicycle Coalition. Council members Lydia Kou and Greg Tanaka are both concluding their second consecutive terms this year and are eligible to run again. The council will see four seats up for grabs in November, with three open seats.
-
----
-
-Headline: New group to weigh higher salaries for Palo Alto council
-URL: https://www.paloaltoonline.com/city-government/2024/03/26/new-group-to-weigh-higher-salaries-for-palo-alto-council/
-Date and Time: Mar 26, 2024 08:54 AM
-AISummary:
-
-Palo Alto City Council members voted to create a citizen committee. The group will be charged with evaluating whether the city should raise compensation for council members. Two weeks ago, the council voted to raise its salaries from $1,000 to £1,600 per month. As a charter city, Palo Alto doesn’t have to follow this limit, but council can change that through a vote of the people. The council is also preparing to approve in the coming months a stipend program that provides $2,000 for each member.
-
----
-
-Headline: Palo Alto considers sacrificing park space to build a bus road in partnership with Stanford
-URL: https://www.mv-voice.com/transportation/2024/03/25/should-parkland-make-way-for-a-transit-road/
-Date and Time: Mar 25, 2024 08:56 AM
-AISummary:
-
-Palo Alto and Stanford University are working on a plan to convert a portion of El Camino Park into a roadway for buses. The plan would create a direct connection between the city’s bustling transit center on University Avenue and ElCamino Real. Stanford would foot the $3.2-million bill for the new road, which would stretch from the western edge of the bus depot to the park. If approved, the project would also require removal of about 15 trees, according to the report.
 
 ---
 

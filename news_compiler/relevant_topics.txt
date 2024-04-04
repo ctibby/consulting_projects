@@ -14,7 +14,3 @@ amazon
 omers
 siemens
 office space
-
-wsj
-nyt
-cronicle

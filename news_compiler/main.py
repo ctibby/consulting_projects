@@ -31,7 +31,9 @@ def add_to_db(url, articles_df, articleid, headlineid, urladd, content_class):
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    article_containers = soup.find_all(articleid, limit=1)
+    article_containers = soup.find_all(articleid, limit=10)
+
+    print(f"\n{url}\n")
 
     for article in article_containers:
         headline_tag = article.find(headlineid)
@@ -42,13 +44,14 @@ def add_to_db(url, articles_df, articleid, headlineid, urladd, content_class):
                 headline = a_tag.get_text(strip=True)
                 date_span = article.find('time', class_=['published', 'tnt-date'])
                 date_time = date_span['datetime'] if date_span and 'datetime' in date_span.attrs else "Date not found"
-                print(date_time)
                 full_url = f"{urladd}{full_url}"
                 
                 article_content = fetch_article_summary(full_url, content_class)
                 temp_df = pd.DataFrame([{'Headline': headline, 'URL': full_url, 'Date and Time': date_time, 'Content': article_content, 'AISummary': summarize_text(article_content)}])
                 articles_df = pd.concat([articles_df, temp_df], ignore_index=True)
-                print(f"{headline} - successfully entered and summarized")
+                print(f"{headline}\nSUCCESSFULLY ENTERED AND SUMMARIZED\n")
+
+    print(f"*****\n")
     return(articles_df)
 
 def scrape_pal_articles_to_db():

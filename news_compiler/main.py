@@ -4,6 +4,7 @@ import pandas as pd
 from transformers import BartTokenizer, BartForConditionalGeneration
 from article_relevance_function import topic_similarity_with_keyword_check
 
+# For AI Summary
 model_name = "facebook/bart-large-cnn"
 tokenizer = BartTokenizer.from_pretrained(model_name)
 model = BartForConditionalGeneration.from_pretrained(model_name)
@@ -67,7 +68,7 @@ def add_to_db(url, articles_df, articleid, headlineid, urladd, content_class):
     print(f"*****\n")
     return(articles_df)
 
-def scrape_pal_articles_to_db():
+def scrape_articles_to_db():
     articles_df = pd.DataFrame(columns=['Headline', 'URL', 'Date and Time', 'Content', 'AISummary', 'Relevance'])
 
     articles_df = add_to_db("https://www.paloaltoonline.com/category/palo-alto-city/", articles_df, 'article', 'h2',"" ,'entry-content')
@@ -94,4 +95,4 @@ def scrape_pal_articles_to_db():
 
     print(f"Article summaries have been saved to {filename}.")
 
-scrape_pal_articles_to_db()
+scrape_articles_to_db()

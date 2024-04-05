@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 from transformers import BartTokenizer, BartForConditionalGeneration
 from article_relevance_function import topic_similarity_with_keyword_check
+from login_test_theregistrysf import theregistrysf_login
 
 model_name = "facebook/bart-large-cnn"
 tokenizer = BartTokenizer.from_pretrained(model_name)
@@ -14,6 +15,7 @@ def fetch_article_summary(article_url, content_class):
         soup = BeautifulSoup(response.content, 'html.parser')
 
         article_content = soup.find('div', class_ = content_class)
+        print(article_content)
         paragraphs = article_content.find_all('p')
         
         summary = "\n\n".join(paragraph.get_text() for paragraph in paragraphs)
@@ -27,6 +29,44 @@ def summarize_text(text, max_length=512, min_length=100, length_penalty=2.0, num
     summary_ids = model.generate(inputs, max_length=max_length, min_length=min_length, length_penalty=length_penalty, num_beams=num_beams, early_stopping=True)
     summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
     return summary
+
+def add_theregistrysf_to_db(url, articles_df, content_class):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    article_containers = soup.find_all('div', class_ = 'item-details', limit=2)
+
+    print(f"\n{url}\n")
+
+    for article in article_containers:
+        headline_tag = article.find('h3')
+        if headline_tag:
+            a_tag = headline_tag.find('a')
+            if a_tag and a_tag.has_attr('href'):
+                full_url = a_tag['href']
+                headline = a_tag.get_text(strip=True)
+                date_span = article.find('time', class_=['entry-date'])
+                date_time = date_span['datetime'] if date_span and 'datetime' in date_span.attrs else "Date not found"
+                # full_url = f"{urladd}{full_url}"
+                
+                article_content = fetch_article_summary(full_url, content_class)
+                article_relevance = topic_similarity_with_keyword_check(article_content)
+                
+                if article_relevance:
+                    # With AISummary
+                    temp_df = pd.DataFrame([{'Headline': headline, 'URL': full_url, 'Date and Time': date_time, 'Content': article_content, 'AISummary': summarize_text(article_content)}])
+                    # Without AI Summary (Faster)
+                    # temp_df = pd.DataFrame([{'Headline': headline, 'URL': full_url, 'Date and Time': date_time, 'Content': article_content, 'AISummary': "Not Pulled - Change code to other option to include", 'Relevance': article_relevance}])
+
+                    articles_df = pd.concat([articles_df, temp_df], ignore_index=True)
+                    print(f"{headline}\nSUCCESSFULLY ENTERED AND SUMMARIZED")
+                    print(f"Relevance: {article_relevance}\n")
+                else:
+                    print(f"{headline}\nSKIPPED")
+                    print(f"Relevance: {article_relevance}\n")
+    
+    print(f"*****\n")
+    return(articles_df)
 
 def add_to_db(url, articles_df, articleid, headlineid, urladd, content_class):  
     response = requests.get(url)
@@ -63,17 +103,19 @@ def add_to_db(url, articles_df, articleid, headlineid, urladd, content_class):
                     print(f"{headline}\nSKIPPED")
                     print(f"Relevance: {article_relevance}\n")
 
-
     print(f"*****\n")
     return(articles_df)
 
 def scrape_pal_articles_to_db():
     articles_df = pd.DataFrame(columns=['Headline', 'URL', 'Date and Time', 'Content', 'AISummary', 'Relevance'])
 
-    articles_df = add_to_db("https://www.paloaltoonline.com/category/palo-alto-city/", articles_df, 'article', 'h2',"" ,'entry-content')
-    articles_df = add_to_db("https://www.paloaltoonline.com/category/palo-alto-city/page/2/", articles_df, 'article', 'h2',"" ,'entry-content')
-    articles_df = add_to_db("https://www.mv-voice.com/category/local-news/", articles_df, 'article', 'h2',"" ,'entry-content')
-    articles_df = add_to_db("https://www.smdailyjournal.com/news/local/", articles_df, 'article', 'h3', "https://www.smdailyjournal.com/", 'asset-content')
+    # articles_df = add_to_db("https://www.paloaltoonline.com/category/palo-alto-city/", articles_df, 'article', 'h2',"" ,'entry-content')
+    # articles_df = add_to_db("https://www.paloaltoonline.com/category/palo-alto-city/page/2/", articles_df, 'article', 'h2',"" ,'entry-content')
+    # articles_df = add_to_db("https://www.mv-voice.com/category/local-news/", articles_df, 'article', 'h2',"" ,'entry-content')
+    # articles_df = add_to_db("https://www.smdailyjournal.com/news/local/", articles_df, 'article', 'h3', "https://www.smdailyjournal.com/", 'asset-content')
+
+    theregistrysf_login()
+    articles_df = add_theregistrysf_to_db("https://news.theregistrysf.com/category/commercial/", articles_df, 'td-post-content')
 
     articles_df = articles_df.drop_duplicates(subset='URL')
     articles_df['Date and Time'] = pd.to_datetime(articles_df['Date and Time'], errors='coerce')

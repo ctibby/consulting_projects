@@ -88,7 +88,7 @@ def scrape_pal_articles_to_db():
 
     with open(filename, 'w', encoding='utf-8') as file:
         for index, row in articles_df.iterrows():
-            file.write(f"Headline: {row['Headline']}\nURL: {row['URL']}\nDate and Time: {row['Date and Time'].strftime('%b %d, %Y %I:%M %p') if not pd.isna(row['Date and Time']) else 'Date not found'}\nAISummary:\n\n{row['AISummary']}\n\n---\n\n")
+            file.write(f"{row['Headline']}\n{row['URL']}\n{row['Date and Time'].strftime('%b %d, %Y %I:%M %p') if not pd.isna(row['Date and Time']) else 'Date not found'}\n\nAISummary:\n{row['AISummary']}\n\n---\n\n")
     
     # articles_df.to_csv(f'article_summaries_{most_recent_date}.csv', index=False, encoding='utf-8')
 

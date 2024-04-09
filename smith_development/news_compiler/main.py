@@ -90,11 +90,11 @@ def scrape_articles_to_db():
     articles_df = add_to_db("https://www.smdailyjournal.com/news/local/", articles_df, 'article', 'h3', "https://www.smdailyjournal.com/", 'asset-content')
     articles_df = add_to_db("https://www.mercurynews.com/tag/commercial-real-estate/", articles_df, 'article', 'h2', "", 'body-copy')
 
-    print(articles_df['Date and Time'])
+    # print(articles_df['Date and Time'])
     articles_df['Date and Time'] = articles_df['Date and Time'].apply(convert_and_localize)
     # articles_df['Date and Time'] = pd.to_datetime(articles_df['Date and Time'], errors='coerce')
     articles_df = articles_df.drop_duplicates(subset='URL')
-    articles_df.sort_values(by='Date and Time', ascending=False, inplace=True)
+    # articles_df.sort_values(by='Date and Time', ascending=False, inplace=True)
 
     print(articles_df['Date and Time'])
 

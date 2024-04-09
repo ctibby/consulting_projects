@@ -3,6 +3,8 @@ import requests
 import pandas as pd
 from transformers import BartTokenizer, BartForConditionalGeneration
 from article_relevance_function import topic_similarity_with_keyword_check
+from dateutil import parser
+import pytz
 
 # For AI Summary
 model_name = "facebook/bart-large-cnn"
@@ -29,6 +31,10 @@ def summarize_text(text, max_length=512, min_length=100, length_penalty=2.0, num
     summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
     return summary
 
+def convert_and_localize(dt_str):
+    dt = parser.parse(dt_str)
+    return dt if dt.tzinfo else pytz.timezone('America/Los_Angeles').localize(dt)
+
 def add_to_db(url, articles_df, articleid, headlineid, urladd, content_class):  
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -40,11 +46,18 @@ def add_to_db(url, articles_df, articleid, headlineid, urladd, content_class):
     for article in article_containers:
         headline_tag = article.find(headlineid)
         if headline_tag:
-            a_tag = headline_tag.find('a')
+            if url == "https://www.mercurynews.com/tag/commercial-real-estate/":
+                a_tag = headline_tag.find('a', class_ = 'article-title')
+            else:
+                a_tag = headline_tag.find('a')
             if a_tag and a_tag.has_attr('href'):
                 full_url = a_tag['href']
                 headline = a_tag.get_text(strip=True)
-                date_span = article.find('time', class_=['published', 'tnt-date'])
+                if url == "https://www.mercurynews.com/tag/commercial-real-estate/":
+                    date_span = article.find('time')
+                else:
+                    date_span = article.find('time', class_=['published', 'tnt-date'])
+                
                 date_time = date_span['datetime'] if date_span and 'datetime' in date_span.attrs else "Date not found"
                 full_url = f"{urladd}{full_url}"
                 
@@ -75,10 +88,15 @@ def scrape_articles_to_db():
     articles_df = add_to_db("https://www.paloaltoonline.com/category/palo-alto-city/page/2/", articles_df, 'article', 'h2',"" ,'entry-content')
     articles_df = add_to_db("https://www.mv-voice.com/category/local-news/", articles_df, 'article', 'h2',"" ,'entry-content')
     articles_df = add_to_db("https://www.smdailyjournal.com/news/local/", articles_df, 'article', 'h3', "https://www.smdailyjournal.com/", 'asset-content')
+    articles_df = add_to_db("https://www.mercurynews.com/tag/commercial-real-estate/", articles_df, 'article', 'h2', "", 'body-copy')
 
+    print(articles_df['Date and Time'])
+    articles_df['Date and Time'] = articles_df['Date and Time'].apply(convert_and_localize)
+    # articles_df['Date and Time'] = pd.to_datetime(articles_df['Date and Time'], errors='coerce')
     articles_df = articles_df.drop_duplicates(subset='URL')
-    articles_df['Date and Time'] = pd.to_datetime(articles_df['Date and Time'], errors='coerce')
     articles_df.sort_values(by='Date and Time', ascending=False, inplace=True)
+
+    print(articles_df['Date and Time'])
 
     # Use the most recent date in the filename
     if not articles_df.empty and not pd.isna(articles_df.iloc[0]['Date and Time']):
